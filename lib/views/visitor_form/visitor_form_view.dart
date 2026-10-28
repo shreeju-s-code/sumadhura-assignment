@@ -217,10 +217,10 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(visitorFormViewModelProvider);
-    final bottomInset = Responsive.bottomInset(context);
     final isSmallScreen = Responsive.screenWidth(context) < 360;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.background,
       appBar: AppBar(
         primary: !widget.isPopup,
@@ -243,7 +243,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
           isSmallScreen ? 14.0 : 18.0,
           18.0,
           isSmallScreen ? 14.0 : 18.0,
-          18.0 + (bottomInset > 0 ? bottomInset * 0.1 : 0),
+          isSmallScreen ? 14.0 : 18.0,
         ),
         child: Form(
           key: _formKey,
@@ -348,6 +348,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
                         _buildSectionTitle('Visitor Type *'),
                         DropdownButtonFormField<VisitorType>(
                           initialValue: _selectedType,
+                          isExpanded: true,
                           decoration: InputDecoration(
                             contentPadding: Responsive.paddingSymmetric(context, horizontal: 12, vertical: 12),
                           ),
@@ -357,6 +358,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
                               child: Text(
                                 type.label,
                                 style: TextStyle(fontSize: Responsive.sp(context, 13.5)),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           }).toList(),
@@ -367,7 +369,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
                       ],
                     ),
                   ),
-                  Responsive.hSpace(context, 14),
+                  Responsive.hSpace(context, 12),
 
                   // Project
                   Expanded(
@@ -377,6 +379,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
                         _buildSectionTitle('Project Location *'),
                         DropdownButtonFormField<ProjectName>(
                           initialValue: _selectedProject,
+                          isExpanded: true,
                           decoration: InputDecoration(
                             contentPadding: Responsive.paddingSymmetric(context, horizontal: 12, vertical: 12),
                           ),
@@ -386,6 +389,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
                               child: Text(
                                 proj.label,
                                 style: TextStyle(fontSize: Responsive.sp(context, 13.5)),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           }).toList(),
@@ -430,11 +434,11 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  Responsive.hSpace(context, 12),
+                  Responsive.hSpace(context, 10),
                   Expanded(
                     flex: 2,
                     child: CustomButton(
-                      label: widget.isEditing ? 'Save Changes' : 'Register & Generate Pass',
+                      label: widget.isEditing ? 'Save Changes' : 'Register Pass',
                       icon: widget.isEditing
                           ? Icons.check_circle_outline_rounded
                           : Icons.qr_code_2_rounded,

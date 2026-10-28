@@ -288,38 +288,62 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
 
   Widget _buildListContent(VisitorListState state, VisitorListViewModel viewModel) {
     if (state.isLoading && state.allVisitors.isEmpty) {
-      return const LoadingView(message: 'Loading visitor directory...');
+      return const SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40.0),
+          child: LoadingView(message: 'Loading visitor directory...'),
+        ),
+      );
     }
 
     if (state.errorMessage != null && state.allVisitors.isEmpty) {
-      return ErrorView(
-        title: 'Failed to load directory',
-        message: state.errorMessage!,
-        onRetry: () => viewModel.refresh(),
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0),
+          child: ErrorView(
+            title: 'Failed to load directory',
+            message: state.errorMessage!,
+            onRetry: () => viewModel.refresh(),
+          ),
+        ),
       );
     }
 
     if (state.filteredVisitors.isEmpty) {
       if (state.hasActiveFilter) {
-        return EmptyStateWidget(
-          icon: Icons.search_off_rounded,
-          title: 'No Matching Visitors',
-          message: 'No visitors found matching your search and filter criteria.',
-          actionLabel: 'Clear All Filters',
-          onAction: () {
-            _searchController.clear();
-            viewModel.resetFilters();
-          },
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: EmptyStateWidget(
+              icon: Icons.search_off_rounded,
+              title: 'No Matching Visitors',
+              message: 'No visitors found matching your search and filter criteria.',
+              actionLabel: 'Clear All Filters',
+              onAction: () {
+                _searchController.clear();
+                viewModel.resetFilters();
+              },
+            ),
+          ),
         );
       }
-      return EmptyStateWidget(
-        icon: Icons.person_add_disabled_rounded,
-        title: 'Visitor Directory Empty',
-        message: 'There are currently no registered visitors in the system.',
-        actionLabel: 'Register Visitor',
-        onAction: () {
-          openRegisterVisitorModal(context);
-        },
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0),
+          child: EmptyStateWidget(
+            icon: Icons.person_add_disabled_rounded,
+            title: 'Visitor Directory Empty',
+            message: 'There are currently no registered visitors in the system.',
+            actionLabel: 'Register Visitor',
+            onAction: () {
+              openRegisterVisitorModal(context);
+            },
+          ),
+        ),
       );
     }
 

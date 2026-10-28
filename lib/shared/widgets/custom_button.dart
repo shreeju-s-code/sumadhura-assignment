@@ -53,12 +53,12 @@ class CustomButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          padding: Responsive.paddingSymmetric(context, horizontal: 16),
+          padding: Responsive.paddingSymmetric(context, horizontal: 8),
         ),
         child: isLoading
             ? SizedBox(
-                width: Responsive.w(context, 22),
-                height: Responsive.w(context, 22),
+                width: Responsive.w(context, 20),
+                height: Responsive.w(context, 20),
                 child: CircularProgressIndicator(
                   strokeWidth: 2.2,
                   valueColor: AlwaysStoppedAnimation<Color>(fgColor),
@@ -69,15 +69,20 @@ class CustomButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: Responsive.sp(context, 18), color: fgColor),
-                    Responsive.hSpace(context, 8),
+                    Icon(icon, size: Responsive.sp(context, 16.5), color: fgColor),
+                    Responsive.hSpace(context, 6),
                   ],
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: Responsive.sp(context, 14.5),
-                      fontWeight: FontWeight.w600,
-                      color: fgColor,
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: Responsive.sp(context, 13.5),
+                        fontWeight: FontWeight.w600,
+                        color: fgColor,
+                      ),
                     ),
                   ),
                 ],

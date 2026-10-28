@@ -89,6 +89,8 @@ class DashboardStatCard extends StatelessWidget {
                 fontSize: Responsive.sp(context, 10.5),
                 color: AppColors.textSecondary,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

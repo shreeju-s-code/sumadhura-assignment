@@ -165,19 +165,19 @@ class DashboardView extends ConsumerWidget {
                       label: 'Register Visitor',
                       icon: Icons.person_add_alt_1_rounded,
                       variant: CustomButtonVariant.primary,
-                      height: Responsive.h(context, 52),
+                      height: Responsive.h(context, 48),
                       onPressed: () {
                         openRegisterVisitorModal(context);
                       },
                     ),
                   ),
-                  Responsive.hSpace(context, 12),
+                  Responsive.hSpace(context, 10),
                   Expanded(
                     child: CustomButton(
                       label: 'Scan QR Code',
                       icon: Icons.qr_code_scanner_rounded,
                       variant: CustomButtonVariant.teal,
-                      height: Responsive.h(context, 52),
+                      height: Responsive.h(context, 48),
                       onPressed: () {
                         Navigator.push(
                           context,
