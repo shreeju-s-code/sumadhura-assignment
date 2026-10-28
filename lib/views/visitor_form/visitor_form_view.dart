@@ -27,32 +27,27 @@ Future<T?> openRegisterVisitorModal<T>(BuildContext context, {Visitor? existingV
       final dialogWidth = (screenWidth * 0.92).clamp(320.0, 520.0);
       final dialogHeight = (screenHeight * 0.82).clamp(460.0, 700.0);
 
-      return MediaQuery.removePadding(
-        context: dialogContext,
-        removeTop: true,
-        child: Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: dialogWidth,
-              height: dialogHeight,
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    blurRadius: 28,
-                    spreadRadius: 3,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Container(
+          width: dialogWidth,
+          height: dialogHeight,
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 28,
+                spreadRadius: 3,
+                offset: const Offset(0, 10),
               ),
-              clipBehavior: Clip.antiAlias,
-              child: VisitorFormView(existingVisitor: existingVisitor, isPopup: true),
-            ),
+            ],
           ),
+          clipBehavior: Clip.antiAlias,
+          child: VisitorFormView(existingVisitor: existingVisitor, isPopup: true),
         ),
       );
     },
@@ -220,7 +215,6 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
     final isSmallScreen = Responsive.screenWidth(context) < 360;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.background,
       appBar: AppBar(
         primary: !widget.isPopup,
@@ -237,6 +231,8 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
         ],
       ),
       body: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         // 4. PADDING with MediaQuery
         padding: Responsive.paddingLTRB(
           context,

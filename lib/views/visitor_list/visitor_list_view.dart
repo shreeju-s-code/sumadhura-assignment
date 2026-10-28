@@ -39,9 +39,11 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
     final state = ref.watch(visitorListViewModelProvider);
     final viewModel = ref.read(visitorListViewModelProvider.notifier);
     final isSmallScreen = Responsive.screenWidth(context) < 360;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      resizeToAvoidBottomInset: false,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : AppColors.background,
       appBar: AppBar(
         toolbarHeight: Responsive.h(context, 76),
         title: Column(
@@ -94,7 +96,7 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
               isSmallScreen ? 12 : 16,
               10,
             ),
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             child: Column(
               children: [
                 // Search Input Field (by name or 10-digit mobile)
@@ -104,18 +106,18 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
                   // 1. TEXTSIZE with MediaQuery
                   style: TextStyle(
                     fontSize: Responsive.sp(context, 14),
-                    color: AppColors.textPrimary,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Search by visitor name or 10-digit mobile...',
                     hintStyle: TextStyle(
                       fontSize: Responsive.sp(context, 13.5),
-                      color: AppColors.textSecondary,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                     ),
                     prefixIcon: Icon(
                       Icons.search_rounded,
                       size: Responsive.sp(context, 20),
-                      color: AppColors.textSecondary,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -127,7 +129,7 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
                           )
                         : null,
                     filled: true,
-                    fillColor: AppColors.background,
+                    fillColor: isDark ? const Color(0xFF0F172A) : AppColors.background,
                     // 4. PADDING with MediaQuery
                     contentPadding: Responsive.paddingSymmetric(context, horizontal: 14, vertical: 12),
                   ),
@@ -174,73 +176,94 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
                 ),
                 Responsive.vSpace(context, 8),
 
-                // Project Filter Row
+                // Project Filter & Total Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Project: ',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(context, 12.5),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                    PopupMenuButton<ProjectName?>(
+                      position: PopupMenuPosition.under,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: isDark ? const Color(0xFF334155) : AppColors.border, width: 1),
+                      ),
+                      onSelected: (val) {
+                        viewModel.setProjectFilter(val);
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem<ProjectName?>(
+                          value: null,
+                          child: Text(
+                            'All Projects',
+                            style: TextStyle(
+                              fontSize: Responsive.sp(context, 12.5),
+                              fontWeight: state.projectFilter == null ? FontWeight.w700 : FontWeight.w500,
+                              color: state.projectFilter == null ? AppColors.tealAccent : (isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary),
+                            ),
                           ),
                         ),
-                        DropdownButton<ProjectName?>(
-                          value: state.projectFilter,
-                          isDense: true,
-                          underline: const SizedBox.shrink(),
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: Responsive.sp(context, 12.5),
-                            fontWeight: FontWeight.w600,
+                        ...ProjectName.values.map(
+                          (p) => PopupMenuItem<ProjectName?>(
+                            value: p,
+                            child: Text(
+                              p.label,
+                              style: TextStyle(
+                                fontSize: Responsive.sp(context, 12.5),
+                                fontWeight: state.projectFilter == p ? FontWeight.w700 : FontWeight.w500,
+                                color: state.projectFilter == p ? AppColors.tealAccent : (isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary),
+                              ),
+                            ),
                           ),
-                          items: [
-                            DropdownMenuItem(
-                              value: null,
-                              child: Text(
-                                'All Projects',
-                                style: TextStyle(fontSize: Responsive.sp(context, 12.5)),
-                              ),
-                            ),
-                            ...ProjectName.values.map(
-                              (p) => DropdownMenuItem(
-                                value: p,
-                                child: Text(
-                                  p.label,
-                                  style: TextStyle(fontSize: Responsive.sp(context, 12.5)),
-                                ),
-                              ),
-                            ),
-                          ],
-                          onChanged: (val) => viewModel.setProjectFilter(val),
                         ),
                       ],
-                    ),
-                    if (state.hasActiveFilter)
-                      GestureDetector(
-                        onTap: () {
-                          _searchController.clear();
-                          viewModel.resetFilters();
-                        },
-                        child: Text(
-                          'Reset Filters',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(context, 12),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.statusDestructive,
-                          ),
+                      child: Container(
+                        padding: Responsive.paddingSymmetric(context, horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : AppColors.background,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: isDark ? const Color(0xFF334155) : AppColors.border, width: 1),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Project: ',
+                              style: TextStyle(
+                                fontSize: Responsive.sp(context, 12),
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              state.projectFilter?.label ?? 'All Projects',
+                              style: TextStyle(
+                                fontSize: Responsive.sp(context, 12),
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? AppColors.tealAccent : AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.arrow_drop_down, size: Responsive.sp(context, 18), color: isDark ? AppColors.tealAccent : AppColors.primary),
+                          ],
                         ),
                       ),
+                    ),
+                    Text(
+                      'Total : ${state.filteredVisitors.length}',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(context, 12.5),
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.tealAccent : AppColors.primary,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
 
-          const Divider(height: 1, color: AppColors.border),
+          Divider(height: 1, color: isDark ? const Color(0xFF334155) : AppColors.border),
 
           // Scrollable visitor list with heavy vibration on pull-to-refresh
           Expanded(
@@ -256,10 +279,12 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
           ),
         ],
       ),
-      floatingActionButton: Container(
-        height: Responsive.h(context, 48),
-        margin: const EdgeInsets.only(bottom: 6),
-        child: FloatingActionButton.extended(
+      floatingActionButton: MediaQuery.viewInsetsOf(context).bottom > 0
+          ? null
+          : Container(
+              height: Responsive.h(context, 48),
+              margin: const EdgeInsets.only(bottom: 6),
+              child: FloatingActionButton.extended(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 4,
@@ -381,20 +406,27 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
     required bool selected,
     required VoidCallback onSelected,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ChoiceChip(
       label: Text(label),
       selected: selected,
-      onSelected: (_) => onSelected(),
-      selectedColor: AppColors.primary,
-      backgroundColor: Colors.white,
+      onSelected: (_) async {
+        await HapticHelper.heavyVibrate();
+        onSelected();
+      },
+      selectedColor: isDark ? AppColors.tealAccent : AppColors.primary,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
       side: BorderSide(
-        color: selected ? AppColors.primary : AppColors.border,
+        color: selected
+            ? (isDark ? AppColors.tealAccent : AppColors.primary)
+            : (isDark ? const Color(0xFF334155) : AppColors.border),
         width: 1,
       ),
       labelStyle: TextStyle(
         fontSize: Responsive.sp(context, 12),
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-        color: selected ? Colors.white : AppColors.textPrimary,
+        color: selected ? Colors.white : (isDark ? const Color(0xFFCBD5E1) : AppColors.textPrimary),
       ),
       padding: Responsive.paddingSymmetric(context, horizontal: 6, vertical: 2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -403,8 +435,33 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
 
   Future<void> _handleCheckIn(Visitor visitor, VisitorListViewModel viewModel) async {
     final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Check In', style: TextStyle(fontWeight: FontWeight.w700)),
+        content: Text('Are you sure you want to check in "${visitor.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.tealAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Check In'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
     try {
       await viewModel.checkIn(visitor);
+      await HapticHelper.heavyVibrate();
       messenger.showSnackBar(
         SnackBar(
           backgroundColor: AppColors.statusCheckedIn,
@@ -423,8 +480,33 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
 
   Future<void> _handleCheckOut(Visitor visitor, VisitorListViewModel viewModel) async {
     final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Check Out', style: TextStyle(fontWeight: FontWeight.w700)),
+        content: Text('Are you sure you want to check out "${visitor.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Check Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
     try {
       await viewModel.checkOut(visitor);
+      await HapticHelper.heavyVibrate();
       messenger.showSnackBar(
         SnackBar(
           backgroundColor: AppColors.primary,

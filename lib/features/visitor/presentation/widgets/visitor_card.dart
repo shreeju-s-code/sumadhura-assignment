@@ -24,15 +24,25 @@ class VisitorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF1E293B) : AppColors.surface;
+    final cardBorder = isDark ? const Color(0xFF334155) : AppColors.border;
+    final primaryTextColor = isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary;
+    final secondaryTextColor = isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+    final chipBg = isDark ? const Color(0xFF0F172A) : AppColors.background;
+    final typeChipBg = isDark ? AppColors.tealAccent.withValues(alpha: 0.18) : AppColors.tealLight;
+    final avatarBg = isDark ? AppColors.tealAccent.withValues(alpha: 0.18) : AppColors.primary.withValues(alpha: 0.08);
+    final avatarTextColor = isDark ? AppColors.tealAccent : AppColors.primary;
+
     return Container(
       margin: EdgeInsets.only(bottom: Responsive.h(context, 12)),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: cardBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -54,11 +64,11 @@ class VisitorCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: Responsive.w(context, 20),
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.08),
+                      backgroundColor: avatarBg,
                       child: Text(
                         visitor.name.isNotEmpty ? visitor.name[0].toUpperCase() : 'V',
                         style: TextStyle(
-                          color: AppColors.primary,
+                          color: avatarTextColor,
                           fontWeight: FontWeight.w700,
                           fontSize: Responsive.sp(context, 16),
                         ),
@@ -72,7 +82,7 @@ class VisitorCard extends StatelessWidget {
                           Text(
                             visitor.name,
                             style: TextStyle(
-                              color: AppColors.textPrimary,
+                              color: primaryTextColor,
                               fontSize: Responsive.sp(context, 15),
                               fontWeight: FontWeight.w700,
                             ),
@@ -85,13 +95,13 @@ class VisitorCard extends StatelessWidget {
                               Icon(
                                 Icons.phone_outlined,
                                 size: Responsive.sp(context, 13),
-                                color: AppColors.textSecondary,
+                                color: secondaryTextColor,
                               ),
                               Responsive.hSpace(context, 4),
                               Text(
                                 visitor.mobile,
                                 style: TextStyle(
-                                  color: AppColors.textSecondary,
+                                  color: secondaryTextColor,
                                   fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -106,7 +116,7 @@ class VisitorCard extends StatelessWidget {
                 ),
 
                 Responsive.vSpace(context, 10),
-                const Divider(height: 1, color: AppColors.border),
+                Divider(height: 1, color: cardBorder),
                 Responsive.vSpace(context, 10),
 
                 // Purpose & Tags
@@ -115,14 +125,14 @@ class VisitorCard extends StatelessWidget {
                     Container(
                       padding: Responsive.paddingSymmetric(context, horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: chipBg,
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: cardBorder),
                       ),
                       child: Text(
                         visitor.project.label,
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: primaryTextColor,
                           fontSize: Responsive.sp(context, 11.5),
                           fontWeight: FontWeight.w600,
                         ),
@@ -132,7 +142,7 @@ class VisitorCard extends StatelessWidget {
                     Container(
                       padding: Responsive.paddingSymmetric(context, horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.tealLight,
+                        color: typeChipBg,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -153,7 +163,7 @@ class VisitorCard extends StatelessWidget {
                 Text(
                   visitor.purpose,
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: secondaryTextColor,
                     fontSize: Responsive.sp(context, 13),
                     fontStyle: FontStyle.italic,
                   ),
@@ -170,7 +180,7 @@ class VisitorCard extends StatelessWidget {
                     Text(
                       'Created: ${DateFormatter.formatDate(visitor.createdAt)}',
                       style: TextStyle(
-                        color: AppColors.textMuted,
+                        color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
                         fontSize: Responsive.sp(context, 11.5),
                       ),
                     ),

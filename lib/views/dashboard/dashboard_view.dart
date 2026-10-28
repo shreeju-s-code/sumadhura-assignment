@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/utils/responsive.dart';
 import '../../features/visitor/data/models/visitor_model.dart';
@@ -25,9 +26,10 @@ class DashboardView extends ConsumerWidget {
     final viewModel = ref.read(dashboardViewModelProvider.notifier);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isSmallScreen = screenWidth < 360;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : AppColors.background,
       appBar: AppBar(
         toolbarHeight: Responsive.h(context, 76),
         title: Column(
@@ -70,20 +72,32 @@ class DashboardView extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, anim) => RotationTransition(
+                turns: anim,
+                child: FadeTransition(opacity: anim, child: child),
               ),
-              child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 20),
+              child: Container(
+                key: ValueKey<bool>(isDark),
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.tealAccent.withValues(alpha: 0.18)
+                      : Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  color: isDark ? const Color(0xFFFBBF24) : Colors.white,
+                  size: 20,
+                ),
+              ),
             ),
-            tooltip: 'Scan Visitor QR',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const QrScannerView()),
-              );
+            tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+            onPressed: () async {
+              await HapticHelper.heavyVibrate();
+              ref.read(themeModeProvider.notifier).toggleTheme();
             },
           ),
           const SizedBox(width: 8),
@@ -111,7 +125,7 @@ class DashboardView extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: Responsive.sp(context, 17),
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -200,7 +214,7 @@ class DashboardView extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: Responsive.sp(context, 16.5),
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary,
                     ),
                   ),
                   TextButton.icon(

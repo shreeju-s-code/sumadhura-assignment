@@ -25,16 +25,23 @@ class DashboardStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF1E293B) : AppColors.surface;
+    final cardBorder = isDark ? const Color(0xFF334155) : AppColors.border;
+    final primaryTextColor = isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary;
+    final secondaryTextColor = isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+    final iconBg = isDark ? accentColor.withValues(alpha: 0.18) : bgColor;
+
     return Container(
       // Responsive padding using MediaQuery
       padding: Responsive.paddingSymmetric(context, horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -53,7 +60,7 @@ class DashboardStatCard extends StatelessWidget {
                 Container(
                   padding: Responsive.paddingAll(context, 6),
                   decoration: BoxDecoration(
-                    color: bgColor,
+                    color: iconBg,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, size: Responsive.sp(context, 16), color: accentColor),
@@ -64,7 +71,7 @@ class DashboardStatCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: Responsive.sp(context, 20),
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: primaryTextColor,
                   ),
                 ),
               ],
@@ -77,7 +84,7 @@ class DashboardStatCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.sp(context, 12),
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: primaryTextColor,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -87,7 +94,7 @@ class DashboardStatCard extends StatelessWidget {
               subtitle,
               style: TextStyle(
                 fontSize: Responsive.sp(context, 10.5),
-                color: AppColors.textSecondary,
+                color: secondaryTextColor,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

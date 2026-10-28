@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/haptic_helper.dart';
@@ -375,6 +376,48 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
     );
   }
 
+  Future<void> _pickAndScanFromGallery(QrScannerViewModel viewModel) async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+
+      final capture = await _scannerController.analyzeImage(image.path);
+      if (capture == null || capture.barcodes.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.statusDestructive,
+            content: Text('No QR code detected in the selected image.'),
+          ),
+        );
+        return;
+      }
+
+      final rawValue = capture.barcodes.first.rawValue?.trim();
+      if (rawValue == null || rawValue.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.statusDestructive,
+            content: Text('QR code in image could not be read.'),
+          ),
+        );
+        return;
+      }
+
+      _handleScannedId(rawValue, viewModel);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.statusDestructive,
+          content: Text('Failed to read image: $e'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = ref.read(qrScannerViewModelProvider.notifier);
@@ -385,7 +428,7 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
-        title: const Text('Gate QR Scanner'),
+        title: const Text('QR Scanner'),
         actions: [
           IconButton(
             icon: Icon(_isTorchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded),
@@ -494,24 +537,57 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
             ),
           ),
 
-          // Manual fallback button at bottom
+          // Half-half buttons at bottom: Enter Pass ID and Upload Scanner
           Positioned(
             bottom: 40,
-            left: 24,
-            right: 24,
-            child: ElevatedButton.icon(
-              onPressed: () => _showManualIdDialog(viewModel),
-              icon: Icon(Icons.keyboard_outlined, size: Responsive.sp(context, 18)),
-              label: Text(
-                'Enter Pass ID Manually',
-                style: TextStyle(fontSize: Responsive.sp(context, 14)),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
-                padding: Responsive.paddingSymmetric(context, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+            left: 20,
+            right: 20,
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _showManualIdDialog(viewModel),
+                    icon: Icon(Icons.keyboard_outlined, size: Responsive.sp(context, 16)),
+                    label: Text(
+                      'Enter Pass ID',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(context, 13),
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                      padding: Responsive.paddingSymmetric(context, vertical: 13, horizontal: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                Responsive.hSpace(context, 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _pickAndScanFromGallery(viewModel),
+                    icon: Icon(Icons.photo_library_outlined, size: Responsive.sp(context, 16)),
+                    label: Text(
+                      'Upload Scanner',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(context, 13),
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                      padding: Responsive.paddingSymmetric(context, vertical: 13, horizontal: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

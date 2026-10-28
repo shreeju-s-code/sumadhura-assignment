@@ -23,6 +23,8 @@ class _MainNavigationViewState extends State<MainNavigationView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: IndexedStack(
@@ -31,26 +33,26 @@ class _MainNavigationViewState extends State<MainNavigationView> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 4,
-        indicatorColor: AppColors.tealLight,
+        indicatorColor: isDark ? AppColors.tealAccent.withValues(alpha: 0.25) : AppColors.tealLight,
         onDestinationSelected: (index) {
           setState(() => _currentIndex = index);
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard_rounded, color: AppColors.primary),
+            icon: Icon(Icons.dashboard_outlined, color: isDark ? const Color(0xFF94A3B8) : null),
+            selectedIcon: Icon(Icons.dashboard_rounded, color: isDark ? AppColors.tealAccent : AppColors.primary),
             label: 'Dashboard',
           ),
           NavigationDestination(
-            icon: Icon(Icons.people_outline_rounded),
-            selectedIcon: Icon(Icons.people_rounded, color: AppColors.primary),
+            icon: Icon(Icons.people_outline_rounded, color: isDark ? const Color(0xFF94A3B8) : null),
+            selectedIcon: Icon(Icons.people_rounded, color: isDark ? AppColors.tealAccent : AppColors.primary),
             label: 'Visitors',
           ),
           NavigationDestination(
-            icon: Icon(Icons.qr_code_scanner_rounded),
-            selectedIcon: Icon(Icons.qr_code_scanner, color: AppColors.primary),
+            icon: Icon(Icons.qr_code_scanner_rounded, color: isDark ? const Color(0xFF94A3B8) : null),
+            selectedIcon: Icon(Icons.qr_code_scanner, color: isDark ? AppColors.tealAccent : AppColors.primary),
             label: 'Scan',
           ),
         ],
