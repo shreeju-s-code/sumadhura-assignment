@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/utils/responsive.dart';
 import '../../features/visitor/data/models/visitor_model.dart';
@@ -202,7 +203,6 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
                       isLoading: isActionRunning,
                       width: double.infinity,
                       onPressed: () async {
-                        final messenger = ScaffoldMessenger.of(context);
                         setSheetState(() => isActionRunning = true);
                         try {
                           await viewModel.checkInScannedVisitor();
@@ -212,12 +212,9 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
                           }
                         } catch (e) {
                           setSheetState(() => isActionRunning = false);
-                          messenger.showSnackBar(
-                            SnackBar(
-                              backgroundColor: AppColors.statusDestructive,
-                              content: Text(e.toString()),
-                            ),
-                          );
+                          if (context.mounted) {
+                            AppSnackBar.showError(context, e.toString());
+                          }
                         }
                       },
                     )
@@ -229,7 +226,6 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
                       isLoading: isActionRunning,
                       width: double.infinity,
                       onPressed: () async {
-                        final messenger = ScaffoldMessenger.of(context);
                         setSheetState(() => isActionRunning = true);
                         try {
                           await viewModel.checkOutScannedVisitor();
@@ -239,12 +235,9 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
                           }
                         } catch (e) {
                           setSheetState(() => isActionRunning = false);
-                          messenger.showSnackBar(
-                            SnackBar(
-                              backgroundColor: AppColors.statusDestructive,
-                              content: Text(e.toString()),
-                            ),
-                          );
+                          if (context.mounted) {
+                            AppSnackBar.showError(context, e.toString());
+                          }
                         }
                       },
                     )
@@ -333,12 +326,7 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
   }
 
   void _showSuccessFeedback(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.statusCheckedIn,
-        content: Text(message),
-      ),
-    );
+    AppSnackBar.showSuccess(context, message);
   }
 
   void _showManualIdDialog(QrScannerViewModel viewModel) {
@@ -385,36 +373,21 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
       final capture = await _scannerController.analyzeImage(image.path);
       if (capture == null || capture.barcodes.isEmpty) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('No QR code detected in the selected image.'),
-          ),
-        );
+        AppSnackBar.showError(context, 'No QR code detected in the selected image.');
         return;
       }
 
       final rawValue = capture.barcodes.first.rawValue?.trim();
       if (rawValue == null || rawValue.isEmpty) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('QR code in image could not be read.'),
-          ),
-        );
+        AppSnackBar.showError(context, 'QR code in image could not be read.');
         return;
       }
 
       _handleScannedId(rawValue, viewModel);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusDestructive,
-          content: Text('Failed to read image: $e'),
-        ),
-      );
+      AppSnackBar.showError(context, 'Failed to read image: $e');
     }
   }
 
@@ -427,11 +400,13 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: const Text('QR Scanner'),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        foregroundColor: Colors.white,
+        title: const Text('QR Scanner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
-            icon: Icon(_isTorchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded),
+            icon: Icon(_isTorchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded, color: Colors.white),
             tooltip: 'Toggle Flashlight',
             onPressed: () {
               _scannerController.toggleTorch();
@@ -539,7 +514,7 @@ class _QrScannerViewState extends ConsumerState<QrScannerView> {
 
           // Half-half buttons at bottom: Enter Pass ID and Upload Scanner
           Positioned(
-            bottom: 40,
+            bottom: 114,
             left: 20,
             right: 20,
             child: Row(

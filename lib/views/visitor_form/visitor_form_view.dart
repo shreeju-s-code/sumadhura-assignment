@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/utils/responsive.dart';
@@ -11,12 +12,12 @@ import '../../shared/widgets/custom_button.dart';
 import '../../viewmodels/visitor_form_viewmodel.dart';
 import '../visitor_details/visitor_details_view.dart';
 
-/// Opens a smooth, slow-transferring centered modal pop-up dialog for visitor registration.
+/// Opens a smooth, slow-transferring centered modal pop-up dialog for visitor registration or editing.
 Future<T?> openRegisterVisitorModal<T>(BuildContext context, {Visitor? existingVisitor}) {
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: 'Register Visitor',
+    barrierLabel: existingVisitor != null ? 'Edit Visitor' : 'Register Visitor',
     barrierColor: Colors.black.withValues(alpha: 0.65),
     transitionDuration: const Duration(milliseconds: 750),
     pageBuilder: (dialogContext, anim1, anim2) {
@@ -71,6 +72,11 @@ Future<T?> openRegisterVisitorModal<T>(BuildContext context, {Visitor? existingV
       );
     },
   );
+}
+
+/// Convenience alias to open modal pop-up dialog for editing an existing visitor.
+Future<T?> openEditVisitorModal<T>(BuildContext context, Visitor existingVisitor) {
+  return openRegisterVisitorModal<T>(context, existingVisitor: existingVisitor);
 }
 
 class VisitorFormView extends ConsumerStatefulWidget {
@@ -142,12 +148,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
         final result = await viewModel.updateVisitor(updated);
 
         if (mounted && result != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              backgroundColor: AppColors.statusCheckedIn,
-              content: Text('Visitor details updated successfully.'),
-            ),
-          );
+          AppSnackBar.showSuccess(context, 'Visitor details updated successfully.');
           Navigator.pop(context, result);
         }
       } else {
@@ -171,11 +172,9 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
 
           if (!mounted) return;
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.statusCheckedIn,
-              content: Text('Visitor "${created.name}" registered with Pass ID #${created.id}!'),
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            'Visitor "${created.name}" registered with Pass ID #${created.id}!',
           );
 
           // Replace form or close popup with Visitor Details showing QR Code pass
@@ -199,12 +198,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Failed to save visitor: $e'),
-          ),
-        );
+        AppSnackBar.showError(context, 'Failed to save visitor: $e');
       }
     }
   }
@@ -445,6 +439,7 @@ class _VisitorFormViewState extends ConsumerState<VisitorFormView> {
                   ),
                 ],
               ),
+              Responsive.vSpace(context, 32),
             ],
           ),
         ),

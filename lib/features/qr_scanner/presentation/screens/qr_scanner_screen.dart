@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import '../../../visitor/data/models/visitor_model.dart';
@@ -191,7 +192,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                       isLoading: isActionRunning,
                       width: double.infinity,
                       onPressed: () async {
-                        final messenger = ScaffoldMessenger.of(context);
                         setSheetState(() => isActionRunning = true);
                         try {
                           await ref.read(visitorListNotifierProvider.notifier).checkIn(visitor);
@@ -201,12 +201,9 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                           }
                         } catch (e) {
                           setSheetState(() => isActionRunning = false);
-                          messenger.showSnackBar(
-                            SnackBar(
-                              backgroundColor: AppColors.statusDestructive,
-                              content: Text(e.toString()),
-                            ),
-                          );
+                          if (context.mounted) {
+                            AppSnackBar.showError(context, e.toString());
+                          }
                         }
                       },
                     )
@@ -218,7 +215,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                       isLoading: isActionRunning,
                       width: double.infinity,
                       onPressed: () async {
-                        final messenger = ScaffoldMessenger.of(context);
                         setSheetState(() => isActionRunning = true);
                         try {
                           await ref.read(visitorListNotifierProvider.notifier).checkOut(visitor);
@@ -228,12 +224,9 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                           }
                         } catch (e) {
                           setSheetState(() => isActionRunning = false);
-                          messenger.showSnackBar(
-                            SnackBar(
-                              backgroundColor: AppColors.statusDestructive,
-                              content: Text(e.toString()),
-                            ),
-                          );
+                          if (context.mounted) {
+                            AppSnackBar.showError(context, e.toString());
+                          }
                         }
                       },
                     )
@@ -322,12 +315,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }
 
   void _showSuccessFeedback(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.statusCheckedIn,
-        content: Text(message),
-      ),
-    );
+    AppSnackBar.showSuccess(context, message);
   }
 
   void _showManualIdDialog() {
@@ -370,11 +358,13 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: const Text('Gate QR Scanner'),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        foregroundColor: Colors.white,
+        title: const Text('Gate QR Scanner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
-            icon: Icon(_isTorchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded),
+            icon: Icon(_isTorchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded, color: Colors.white),
             tooltip: 'Toggle Flashlight',
             onPressed: () {
               _scannerController.toggleTorch();
@@ -382,7 +372,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.flip_camera_ios_rounded),
+            icon: const Icon(Icons.flip_camera_ios_rounded, color: Colors.white),
             tooltip: 'Flip Camera',
             onPressed: () => _scannerController.switchCamera(),
           ),

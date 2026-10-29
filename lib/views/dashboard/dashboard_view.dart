@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/utils/responsive.dart';
 import '../../features/visitor/data/models/visitor_model.dart';
@@ -111,10 +112,11 @@ class DashboardView extends ConsumerWidget {
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: Responsive.paddingSymmetric(
-            context,
-            horizontal: isSmallScreen ? 12.0 : 16.0,
-            vertical: 18.0,
+          padding: EdgeInsets.fromLTRB(
+            isSmallScreen ? 12.0 : 16.0,
+            16.0,
+            isSmallScreen ? 12.0 : 16.0,
+            118.0,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +127,9 @@ class DashboardView extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: Responsive.sp(context, 17),
                   fontWeight: FontWeight.w700,
-                  color: isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary,
+                  color: isDark
+                      ? const Color(0xFFF1F5F9)
+                      : AppColors.textPrimary,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -195,7 +199,9 @@ class DashboardView extends ConsumerWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const QrScannerView()),
+                          MaterialPageRoute(
+                            builder: (_) => const QrScannerView(),
+                          ),
                         );
                       },
                     ),
@@ -214,14 +220,18 @@ class DashboardView extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: Responsive.sp(context, 16.5),
                       fontWeight: FontWeight.w700,
-                      color: isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary,
+                      color: isDark
+                          ? const Color(0xFFF1F5F9)
+                          : AppColors.textPrimary,
                     ),
                   ),
                   TextButton.icon(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const VisitorListView()),
+                        MaterialPageRoute(
+                          builder: (_) => const VisitorListView(),
+                        ),
                       );
                     },
                     icon: Text(
@@ -248,7 +258,8 @@ class DashboardView extends ConsumerWidget {
                   padding: EdgeInsets.symmetric(vertical: 40.0),
                   child: LoadingView(message: 'Loading visitor statistics...'),
                 )
-              else if (state.errorMessage != null && state.recentVisitors.isEmpty)
+              else if (state.errorMessage != null &&
+                  state.recentVisitors.isEmpty)
                 ErrorView(
                   title: 'Unable to load dashboard',
                   message: state.errorMessage!,
@@ -258,7 +269,8 @@ class DashboardView extends ConsumerWidget {
                 EmptyStateWidget(
                   icon: Icons.group_off_rounded,
                   title: 'No Visitors Registered',
-                  message: 'Register a visitor or scan a QR pass to start recording visits.',
+                  message:
+                      'Register a visitor or scan a QR pass to start recording visits.',
                   actionLabel: 'Register First Visitor',
                   onAction: () {
                     openRegisterVisitorModal(context);
@@ -293,43 +305,99 @@ class DashboardView extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleCheckIn(BuildContext context, DashboardViewModel vm, Visitor visitor) async {
-    final messenger = ScaffoldMessenger.of(context);
+  Future<void> _handleCheckIn(
+    BuildContext context,
+    DashboardViewModel vm,
+    Visitor visitor,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'Confirm Check In',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        content: Text('Are you sure you want to check in "${visitor.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.tealAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Check In'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
     try {
       await vm.checkIn(visitor);
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusCheckedIn,
-          content: Text('${visitor.name} successfully checked in.'),
-        ),
-      );
+      await HapticHelper.heavyVibrate();
+      if (context.mounted) {
+        AppSnackBar.showSuccess(
+          context,
+          '${visitor.name} successfully checked in.',
+        );
+      }
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusDestructive,
-          content: Text(e.toString()),
-        ),
-      );
+      if (context.mounted) {
+        AppSnackBar.showError(context, e.toString());
+      }
     }
   }
 
-  Future<void> _handleCheckOut(BuildContext context, DashboardViewModel vm, Visitor visitor) async {
-    final messenger = ScaffoldMessenger.of(context);
+  Future<void> _handleCheckOut(
+    BuildContext context,
+    DashboardViewModel vm,
+    Visitor visitor,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'Confirm Check Out',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        content: Text('Are you sure you want to check out "${visitor.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Check Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
     try {
       await vm.checkOut(visitor);
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.primary,
-          content: Text('${visitor.name} successfully checked out.'),
-        ),
-      );
+      await HapticHelper.heavyVibrate();
+      if (context.mounted) {
+        AppSnackBar.showSuccess(
+          context,
+          '${visitor.name} successfully checked out.',
+        );
+      }
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusDestructive,
-          content: Text(e.toString()),
-        ),
-      );
+      if (context.mounted) {
+        AppSnackBar.showError(context, e.toString());
+      }
     }
   }
 }

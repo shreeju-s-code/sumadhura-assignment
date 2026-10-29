@@ -1,9 +1,6 @@
-/// Central API configuration and endpoint registry.
-/// The base URL is configurable and can be customized via environment variables,
-/// build configs, or runtime settings.
+
 abstract class ApiEndpoints {
-  /// Default base URL pointing to MockAPI or configurable endpoint.
-  /// Replace with your MockAPI project endpoint (e.g., https://6600xxxx.mockapi.io/api/v1).
+  // Default base URL pointing to MockAPI 
   static String baseUrl = const String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'https://6ae0f627be3bc8fead981e6d.mockapi.io/api/v1/',

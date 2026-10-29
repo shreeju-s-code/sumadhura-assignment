@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_button.dart';
@@ -75,12 +76,7 @@ class _VisitorFormScreenState extends ConsumerState<VisitorFormScreen> {
         await ref.read(visitorListNotifierProvider.notifier).updateVisitor(updated);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              backgroundColor: AppColors.statusCheckedIn,
-              content: Text('Visitor details updated successfully.'),
-            ),
-          );
+          AppSnackBar.showSuccess(context, 'Visitor details updated successfully.');
           Navigator.pop(context, updated);
         }
       } else {
@@ -99,11 +95,9 @@ class _VisitorFormScreenState extends ConsumerState<VisitorFormScreen> {
         final created = await ref.read(visitorListNotifierProvider.notifier).registerVisitor(newVisitor);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.statusCheckedIn,
-              content: Text('Visitor "${created.name}" registered with Pass ID #${created.id}!'),
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            'Visitor "${created.name}" registered with Pass ID #${created.id}!',
           );
 
           // Replace form with Visitor Details showing QR Code pass
@@ -117,12 +111,7 @@ class _VisitorFormScreenState extends ConsumerState<VisitorFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Failed to save visitor: $e'),
-          ),
-        );
+        AppSnackBar.showError(context, 'Failed to save visitor: $e');
       }
     } finally {
       if (mounted) {

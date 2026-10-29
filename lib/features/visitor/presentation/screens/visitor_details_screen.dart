@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/error_view.dart';
@@ -439,21 +440,11 @@ class _VisitorDetailsScreenState extends ConsumerState<VisitorDetailsScreen> {
     try {
       await ref.read(visitorListNotifierProvider.notifier).checkIn(visitor);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusCheckedIn,
-            content: Text('${visitor.name} has been successfully checked in.'),
-          ),
-        );
+        AppSnackBar.showSuccess(context, '${visitor.name} has been successfully checked in.');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text(e.toString()),
-          ),
-        );
+        AppSnackBar.showError(context, e.toString());
       }
     } finally {
       if (mounted) setState(() => _isProcessingAction = false);
@@ -465,21 +456,15 @@ class _VisitorDetailsScreenState extends ConsumerState<VisitorDetailsScreen> {
     try {
       await ref.read(visitorListNotifierProvider.notifier).checkOut(visitor);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.primary,
-            content: Text('${visitor.name} has been checked out.'),
-          ),
+        AppSnackBar.showInfo(
+          context,
+          '${visitor.name} has been checked out.',
+          icon: Icons.logout_rounded,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text(e.toString()),
-          ),
-        );
+        AppSnackBar.showError(context, e.toString());
       }
     } finally {
       if (mounted) setState(() => _isProcessingAction = false);
@@ -487,7 +472,6 @@ class _VisitorDetailsScreenState extends ConsumerState<VisitorDetailsScreen> {
   }
 
   Future<void> _confirmDelete(Visitor visitor) async {
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
     final confirmed = await showDialog<bool>(
@@ -512,20 +496,18 @@ class _VisitorDetailsScreenState extends ConsumerState<VisitorDetailsScreen> {
     if (confirmed == true && mounted) {
       try {
         await ref.read(visitorListNotifierProvider.notifier).deleteVisitor(visitor.id);
-        messenger.showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Visitor "${visitor.name}" deleted.'),
-          ),
-        );
+        if (mounted) {
+          AppSnackBar.showInfo(
+            context,
+            'Visitor "${visitor.name}" deleted.',
+            icon: Icons.delete_outline_rounded,
+          );
+        }
         navigator.pop(); // Return back to list
       } catch (e) {
-        messenger.showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Failed to delete visitor: $e'),
-          ),
-        );
+        if (mounted) {
+          AppSnackBar.showError(context, 'Failed to delete visitor: $e');
+        }
       }
     }
   }

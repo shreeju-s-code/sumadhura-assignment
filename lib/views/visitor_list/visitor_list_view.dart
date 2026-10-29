@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/utils/responsive.dart';
 import '../../features/visitor/data/models/visitor_model.dart';
@@ -283,7 +284,7 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
           ? null
           : Container(
               height: Responsive.h(context, 48),
-              margin: const EdgeInsets.only(bottom: 6),
+              margin: const EdgeInsets.only(bottom: 115),
               child: FloatingActionButton.extended(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
@@ -434,7 +435,6 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
   }
 
   Future<void> _handleCheckIn(Visitor visitor, VisitorListViewModel viewModel) async {
-    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -462,24 +462,17 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
     try {
       await viewModel.checkIn(visitor);
       await HapticHelper.heavyVibrate();
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusCheckedIn,
-          content: Text('${visitor.name} has been checked in.'),
-        ),
-      );
+      if (mounted) {
+        AppSnackBar.showSuccess(context, '${visitor.name} has been checked in.');
+      }
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusDestructive,
-          content: Text(e.toString()),
-        ),
-      );
+      if (mounted) {
+        AppSnackBar.showError(context, e.toString());
+      }
     }
   }
 
   Future<void> _handleCheckOut(Visitor visitor, VisitorListViewModel viewModel) async {
-    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -507,24 +500,20 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
     try {
       await viewModel.checkOut(visitor);
       await HapticHelper.heavyVibrate();
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.primary,
-          content: Text('${visitor.name} has checked out.'),
-        ),
-      );
+      if (mounted) {
+        AppSnackBar.showSuccess(
+          context,
+          '${visitor.name} has checked out.',
+        );
+      }
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusDestructive,
-          content: Text(e.toString()),
-        ),
-      );
+      if (mounted) {
+        AppSnackBar.showError(context, e.toString());
+      }
     }
   }
 
   Future<void> _confirmDelete(Visitor visitor, VisitorListViewModel viewModel) async {
-    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -547,19 +536,16 @@ class _VisitorListViewState extends ConsumerState<VisitorListView> {
     if (confirmed == true && mounted) {
       try {
         await viewModel.deleteVisitor(visitor.id);
-        messenger.showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Visitor "${visitor.name}" deleted.'),
-          ),
-        );
+        if (mounted) {
+          AppSnackBar.showSuccess(
+            context,
+            'Visitor "${visitor.name}" deleted.',
+          );
+        }
       } catch (e) {
-        messenger.showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Failed to delete visitor: $e'),
-          ),
-        );
+        if (mounted) {
+          AppSnackBar.showError(context, 'Failed to delete visitor: $e');
+        }
       }
     }
   }

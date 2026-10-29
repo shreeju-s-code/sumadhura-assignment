@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/responsive.dart';
 import '../../features/visitor/data/models/visitor_model.dart';
@@ -32,12 +33,7 @@ class VisitorDetailsView extends ConsumerWidget {
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Edit Visitor',
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => VisitorFormView(existingVisitor: state.visitor),
-                  ),
-                );
+                openEditVisitorModal(context, state.visitor!);
               },
             ),
             IconButton(
@@ -443,22 +439,39 @@ class VisitorDetailsView extends ConsumerWidget {
     Visitor visitor,
     VisitorDetailsViewModel viewModel,
   ) async {
-    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Check In', style: TextStyle(fontWeight: FontWeight.w700)),
+        content: Text('Are you sure you want to check in "${visitor.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.tealAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Check In'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
     try {
       await viewModel.checkIn();
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusCheckedIn,
-          content: Text('${visitor.name} has been successfully checked in.'),
-        ),
-      );
+      if (context.mounted) {
+        AppSnackBar.showSuccess(context, '${visitor.name} has been successfully checked in.');
+      }
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusDestructive,
-          content: Text(e.toString()),
-        ),
-      );
+      if (context.mounted) {
+        AppSnackBar.showError(context, e.toString());
+      }
     }
   }
 
@@ -467,22 +480,42 @@ class VisitorDetailsView extends ConsumerWidget {
     Visitor visitor,
     VisitorDetailsViewModel viewModel,
   ) async {
-    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Check Out', style: TextStyle(fontWeight: FontWeight.w700)),
+        content: Text('Are you sure you want to check out "${visitor.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Check Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
     try {
       await viewModel.checkOut();
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.primary,
-          content: Text('${visitor.name} has been checked out.'),
-        ),
-      );
+      if (context.mounted) {
+        AppSnackBar.showSuccess(
+          context,
+          '${visitor.name} has been checked out.',
+        );
+      }
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusDestructive,
-          content: Text(e.toString()),
-        ),
-      );
+      if (context.mounted) {
+        AppSnackBar.showError(context, e.toString());
+      }
     }
   }
 
@@ -491,7 +524,6 @@ class VisitorDetailsView extends ConsumerWidget {
     Visitor visitor,
     VisitorDetailsViewModel viewModel,
   ) async {
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
     final confirmed = await showDialog<bool>(
@@ -513,23 +545,20 @@ class VisitorDetailsView extends ConsumerWidget {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && context.mounted) {
       try {
         await viewModel.delete();
-        messenger.showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Visitor "${visitor.name}" deleted.'),
-          ),
-        );
+        if (context.mounted) {
+          AppSnackBar.showSuccess(
+            context,
+            'Visitor "${visitor.name}" deleted.',
+          );
+        }
         navigator.pop();
       } catch (e) {
-        messenger.showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusDestructive,
-            content: Text('Failed to delete visitor: $e'),
-          ),
-        );
+        if (context.mounted) {
+          AppSnackBar.showError(context, 'Failed to delete visitor: $e');
+        }
       }
     }
   }
