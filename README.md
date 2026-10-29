@@ -1,10 +1,10 @@
 # Sumadhura Visitor Management Mobile Application
 
-> An enterprise-grade Flutter mobile application built for front-desk reception and security personnel at **Sumadhura Properties** to register visitors, manage visitor directories, generate/scan QR codes, and record visitor check-in and check-out activities. Implemented following strict **Model-View-ViewModel (MVVM)** architectural separation, Riverpod state management, Dio REST client, camera QR scanning, and persistent MockAPI synchronization.
+> An Assignment mobile application built for front-desk reception and security personnel at **Sumadhura Properties** to register visitors, manage visitor directories, generate/scan QR codes, and record visitor check-in and check-out activities. Implemented following strict **Model-View-ViewModel (MVVM)** architectural separation, Riverpod state management, Dio REST client, camera QR scanning, and persistent MockAPI synchronization.
 
 ---
 
-## 📱 Environment & SDK Versions
+## Environment & SDK Versions
 
 - **Flutter SDK**: `3.38.5` (Channel stable)
 - **Dart SDK**: `3.10.4`
@@ -15,7 +15,7 @@
 
 ---
 
-## 🚀 Setup & Run Instructions
+## Setup & Run Instructions
 
 ### 1. Prerequisites
 Ensure you have the following installed on your machine:
@@ -71,7 +71,7 @@ build/app/outputs/flutter-apk/app-release.apk
 
 ---
 
-## 🔐 Test Login Credentials
+## Test Login Credentials
 
 > **Notice**: As per the assignment scenario and specifications, this application is designed for front-desk and security desk personnel on dedicated premise devices. **No login credentials or authentication gates are required.** 
 >
@@ -103,9 +103,9 @@ The application integrates with **MockAPI** for persistent cloud CRUD operations
 ```json
 {
   "id": "101",
-  "name": "Rahul Sharma",
+  "name": "Sreejesh Kumar",
   "mobile": "9876543210",
-  "email": "rahul.sharma@example.com",
+  "email": "sreejesh.kumar@example.com",
   "visitor_type": "Customer",
   "project": "Project A",
   "purpose": "Site visit & flat handover",
